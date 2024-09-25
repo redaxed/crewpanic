@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Videos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #0077be;
+            overflow: hidden;
+        }
+        #videoContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            z-index: 10;
+            position: relative;
+        }
+        #playerWrapper {
+            display: none; /* Hide the player wrapper initially */
+        }
+        #playButton {
+            font-size: 18px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ff0000; /* Changed to red */
+            color: white;
+            border: none;
+            border-radius: 50px; /* Made it more circular */
+            margin-bottom: 20px;
+            font-weight: bold; /* Made text bold */
+            text-transform: uppercase; /* Made text uppercase */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
+            transition: all 0.3s ease; /* Added transition for hover effect */
+        }
+        #playButton:hover {
+            background-color: #cc0000; /* Darker red on hover */
+            transform: scale(1.05); /* Slight increase in size on hover */
+        }
+        .fish {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .fish::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        .fish-right::before { left: -5px; }
+        .fish-left::before { right: -5px; }
+        .fish-up::before, .fish-down::before { left: 50%; transform: translateX(-50%); }
+
+        @keyframes swimRight {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100vw); }
+        }
+        @keyframes swimLeft {
+            from { transform: translateX(100vw); }
+            to { transform: translateX(-100%); }
+        }
+        @keyframes swimDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(100vh); }
+        }
+        @keyframes swimUp {
+            from { transform: translateY(100vh); }
+            to { transform: translateY(-100%); }
+        }
+
+        .fish-right { animation: swimRight linear infinite; }
+        .fish-left { animation: swimLeft linear infinite; }
+        .fish-down { animation: swimDown linear infinite; }
+        .fish-up { animation: swimUp linear infinite; }
+
+        .bubble {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: rise 10s infinite ease-in;
+        }
+        @keyframes rise {
+            0% { transform: translateY(100vh); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100px); opacity: 0; }
+        }
+
+        #fishContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <button id="playButton">I give up</button>
+        <div id="playerWrapper">
+            <div id="player"></div>
+        </div>
+    </div>
+
+    <div id="fishContainer">
+        <!-- Fish and bubbles will be added here -->
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        var player;
+        var videoIds = ['c_7p-GCLRlw', '185P8k66-k8', 'I44ALLYyEMI','0y2CuPZpbiE','eZPOWUlhCSY', 'oYO61JKhp0U']; // Replace with actual video IDs
+        var currentVideoIndex = -1;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '360',
+                width: '640',
+                videoId: getRandomVideoId(),
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            document.getElementById('playButton').addEventListener('click', playRandomVideo);
+        }
+
+        function getRandomVideoId() {
+            return videoIds[Math.floor(Math.random() * videoIds.length)];
+        }
+
+        function playRandomVideo() {
+            var playerWrapper = document.getElementById('playerWrapper');
+            var playButton = document.getElementById('playButton');
+
+            player.loadVideoById(getRandomVideoId());
+            player.playVideo();
+
+            if (playerWrapper.style.display === 'none' || playerWrapper.style.display === '') {
+                playerWrapper.style.display = 'block';
+                playButton.textContent = 'Still Panicked';
+            } else {
+                playButton.textContent = 'Still Panicked';
+            }
+        }
+
+        // Create fish elements
+        const fishContainer = document.getElementById('fishContainer');
+        
+        function createFish() {
+            const fish = document.createElement('div');
+            fish.className = 'fish';
+            const direction = ['right', 'left', 'down', 'up'][Math.floor(Math.random() * 4)];
+            fish.classList.add(`fish-${direction}`);
+            
+            const colors = ['#FF9933', '#FF5733', '#33A1FF', '#33FF57', '#FFD700'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            fish.style.backgroundColor = color;
+            fish.style.borderRadius = '50% 50% 50% 50% / 60% 60% 40% 40%';
+            fish.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
+            
+            if (direction === 'right' || direction === 'left') {
+                fish.style.top = `${Math.random() * 100}%`;
+                fish.style.left = direction === 'right' ? '-60px' : 'calc(100% + 60px)';
+            } else {
+                fish.style.left = `${Math.random() * 100}%`;
+                fish.style.top = direction === 'down' ? '-30px' : 'calc(100% + 30px)';
+            }
+            
+            fish.style.animationDuration = `${15 + Math.random() * 10}s`;
+
+            const tail = document.createElement('div');
+            tail.style.position = 'absolute';
+            tail.style.width = '20px';
+            tail.style.height = '20px';
+            tail.style.backgroundColor = color;
+            tail.style.borderRadius = '50%';
+
+            if (direction === 'right') {
+                tail.style.right = '-10px';
+                tail.style.top = '5px';
+            } else if (direction === 'left') {
+                tail.style.left = '-10px';
+                tail.style.top = '5px';
+            } else if (direction === 'up') {
+                tail.style.bottom = '-10px';
+                tail.style.left = '20px';
+            } else {
+                tail.style.top = '-10px';
+                tail.style.left = '20px';
+            }
+
+            fish.appendChild(tail);
+            return fish;
+        }
+
+        function createBubble() {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.width = `${5 + Math.random() * 10}px`;
+            bubble.style.height = bubble.style.width;
+            bubble.style.animationDuration = `${5 + Math.random() * 10}s`;
+            return bubble;
+        }
+
+        for (let i = 0; i < 20; i++) {
+            fishContainer.appendChild(createFish());
+        }
+
+        for (let i = 0; i < 50; i++) {
+            fishContainer.appendChild(createBubble());
+        }
+    </script>
+</body>
+</html>
+
+
